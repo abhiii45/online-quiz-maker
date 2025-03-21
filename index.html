@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Quiz | Modern Quiz Experience</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="welcome-content">
+                <h1 class="app-title">Nebula Quiz</h1>
+                <div class="subtitle">Expand your mind through the cosmos of knowledge</div>
+                
+                <div class="quiz-setup">
+                    <div class="form-group">
+                        <label for="username">Your Name</label>
+                        <input type="text" id="username" placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quiz-category">Select Category</label>
+                        <select id="quiz-category">
+                            <option value="general">General Knowledge</option>
+                            <option value="science">Science</option>
+                            <option value="history">History</option>
+                            <option value="movies">Movies & TV</option>
+                            <option value="custom">Create Custom Quiz</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="difficulty">Difficulty Level</label>
+                        <div class="difficulty-selector">
+                            <button class="difficulty-btn" data-level="easy">Easy</button>
+                            <button class="difficulty-btn" data-level="medium">Medium</button>
+                            <button class="difficulty-btn active" data-level="hard">Hard</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="questions-count">Number of Questions</label>
+                        <div class="question-counter">
+                            <button id="decrease-questions" class="counter-btn"><i class="fas fa-minus"></i></button>
+                            <span id="questions-number">10</span>
+                            <button id="increase-questions" class="counter-btn"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="start-quiz-btn" class="primary-btn">Start Quiz</button>
+                    <button id="create-quiz-btn" class="secondary-btn hidden">Create Custom Quiz</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quiz Creator Screen (Hidden by default) -->
+        <div id="creator-screen" class="screen">
+            <div class="screen-header">
+                <h2>Create Your Quiz</h2>
+                <button id="back-to-welcome" class="icon-btn"><i class="fas fa-arrow-left"></i></button>
+            </div>
+            
+            <div class="creator-content">
+                <div class="form-group">
+                    <label for="quiz-title">Quiz Title</label>
+                    <input type="text" id="quiz-title" placeholder="Enter a title for your quiz">
+                </div>
+                
+                <div id="questions-container">
+                    <!-- Question template will be duplicated by JS -->
+                    <div class="question-editor">
+                        <div class="question-header">
+                            <h3>Question 1</h3>
+                            <button class="remove-question-btn"><i class="fas fa-trash"></i></button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Question Text</label>
+                            <textarea placeholder="Enter your question here"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Question Type</label>
+                            <select class="question-type-selector">
+                                <option value="multiple">Multiple Choice</option>
+                                <option value="boolean">True/False</option>
+                                <option value="text">Text Answer</option>
+                            </select>
+                        </div>
+                        
+                        <div class="answers-container">
+                            <div class="answer-option">
+                                <input type="radio" name="correct-1" checked>
+                                <input type="text" placeholder="Answer option">
+                                <button class="remove-option-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="answer-option">
+                                <input type="radio" name="correct-1">
+                                <input type="text" placeholder="Answer option">
+                                <button class="remove-option-btn"><i class="fas fa-times"></i></button>
+                            </div>
+                            <button class="add-option-btn"><i class="fas fa-plus"></i> Add Option</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="add-question-btn" class="secondary-btn"><i class="fas fa-plus"></i> Add Question</button>
+                
+                <div class="action-buttons">
+                    <button id="save-quiz-btn" class="primary-btn">Save Quiz</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <div class="quiz-info">
+                    <h2 id="quiz-title-display">General Knowledge</h2>
+                    <div class="quiz-meta">
+                        <span id="difficulty-display" class="tag">Medium</span>
+                        <span id="category-display" class="tag">Science</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-progress">
+                    <div class="progress-stats">
+                        <span id="current-question">1</span>/<span id="total-questions">10</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 10%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quiz-content">
+                <div class="timer">
+                    <div class="timer-circle">
+                        <svg viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" class="timer-bg"></circle>
+                            <circle cx="50" cy="50" r="45" class="timer-progress"></circle>
+                        </svg>
+                        <span id="timer-value">30</span>
+                    </div>
+                </div>
+                
+                <div class="question-container">
+                    <h3 id="question-text">What is the largest planet in our solar system?</h3>
+                    
+                    <div id="answers-container" class="answers-container">
+                        <!-- Will be populated by JS -->
+                        <button class="answer-btn">Jupiter</button>
+                        <button class="answer-btn">Saturn</button>
+                        <button class="answer-btn">Neptune</button>
+                        <button class="answer-btn">Earth</button>
+                    </div>
+                </div>
+                
+                <div class="hint-container">
+                    <button id="hint-btn" class="hint-btn"><i class="fas fa-lightbulb"></i> Use Hint</button>
+                    <div id="hint-text" class="hint-text hidden">This planet has a Great Red Spot!</div>
+                </div>
+            </div>
+            
+            <div class="quiz-footer">
+                <button id="skip-btn" class="secondary-btn">Skip <i class="fas fa-forward"></i></button>
+                <button id="next-btn" class="primary-btn disabled">Next <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+        
+        <!-- Results Screen -->
+        <div id="results-screen" class="screen">
+            <div class="results-header">
+                <h2>Quiz Complete!</h2>
+                <div class="user-score">
+                    <div class="score-circle">
+                        <svg viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" class="score-bg"></circle>
+                            <circle cx="50" cy="50" r="45" class="score-fill" style="stroke-dasharray: 283; stroke-dashoffset: 70"></circle>
+                        </svg>
+                        <div class="score-text">
+                            <span id="score-percentage">75%</span>
+                            <span class="score-label">Score</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-stats">
+                <div class="stat-item">
+                    <span class="stat-value correct" id="correct-answers">15</span>
+                    <span class="stat-label">Correct</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value incorrect" id="incorrect-answers">5</span>
+                    <span class="stat-label">Incorrect</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="time-taken">4:32</span>
+                    <span class="stat-label">Time</span>
+                </div>
+            </div>
+            
+            <div class="performance-insights">
+                <h3>Performance Insights</h3>
+                <div class="insights-container">
+                    <div class="insight-item">
+                        <div class="insight-icon"><i class="fas fa-bolt"></i></div>
+                        <div class="insight-text">
+                            <h4>Quick Responses</h4>
+                            <p>You answered questions 30% faster than average!</p>
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <div class="insight-icon"><i class="fas fa-brain"></i></div>
+                        <div class="insight-text">
+                            <h4>Knowledge Areas</h4>
+                            <p>You excel in History but could improve in Science.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="review-answers-btn" class="secondary-btn">Review Answers</button>
+                <button id="view-leaderboard-btn" class="primary-btn">View Leaderboard</button>
+            </div>
+        </div>
+        
+        <!-- Review Answers Screen -->
+        <div id="review-screen" class="screen">
+            <div class="screen-header">
+                <h2>Answer Review</h2>
+                <button id="back-to-results" class="icon-btn"><i class="fas fa-arrow-left"></i></button>
+            </div>
+            
+            <div class="review-content">
+                <div id="review-questions-container">
+                    <!-- Will be populated by JS -->
+                    <div class="review-question correct">
+                        <div class="review-question-header">
+                            <h3>Question 1</h3>
+                            <span class="question-result"><i class="fas fa-check"></i></span>
+                        </div>
+                        <p class="question-text">What is the largest planet in our solar system?</p>
+                        <div class="answer-review">
+                            <p><strong>Your answer:</strong> <span class="correct-text">Jupiter</span></p>
+                            <p><strong>Correct answer:</strong> Jupiter</p>
+                        </div>
+                        <div class="explanation">
+                            <p>Jupiter is the largest planet in our solar system with a radius of about 43,441 miles.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="review-question incorrect">
+                        <div class="review-question-header">
+                            <h3>Question 2</h3>
+                            <span class="question-result"><i class="fas fa-times"></i></span>
+                        </div>
+                        <p class="question-text">Who wrote "Romeo and Juliet"?</p>
+                        <div class="answer-review">
+                            <p><strong>Your answer:</strong> <span class="incorrect-text">Charles Dickens</span></p>
+                            <p><strong>Correct answer:</strong> William Shakespeare</p>
+                        </div>
+                        <div class="explanation">
+                            <p>William Shakespeare wrote "Romeo and Juliet" around 1594-1595.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leaderboard Screen -->
+        <div id="leaderboard-screen" class="screen">
+            <div class="screen-header">
+                <h2>Leaderboard</h2>
+                <button id="back-to-results-from-leaderboard" class="icon-btn"><i class="fas fa-arrow-left"></i></button>
+            </div>
+            
+            <div class="leaderboard-content">
+                <div class="leaderboard-tabs">
+                    <button class="tab-btn active" data-tab="global">Global</button>
+                    <button class="tab-btn" data-tab="friends">Friends</button>
+                    <button class="tab-btn" data-tab="category">By Category</button>
+                </div>
+                
+                <div class="leaderboard-filters">
+                    <select id="time-filter">
+                        <option value="all-time">All Time</option>
+                        <option value="this-week">This Week</option>
+                        <option value="today">Today</option>
+                    </select>
+                    
+                    <select id="category-filter" class="hidden">
+                        <option value="general">General Knowledge</option>
+                        <option value="science">Science</option>
+                        <option value="history">History</option>
+                        <option value="movies">Movies & TV</option>
+                    </select>
+                </div>
+                
+                <div class="top-performers">
+                    <div class="performer second-place">
+                        <div class="rank">2</div>
+                        <div class="performer-avatar">
+                            <img src="/api/placeholder/50/50" alt="Avatar">
+                        </div>
+                        <div class="performer-name">Alex</div>
+                        <div class="performer-score">92%</div>
+                    </div>
+                    
+                    <div class="performer first-place">
+                        <div class="rank">1</div>
+                        <div class="performer-avatar">
+                            <img src="/api/placeholder/50/50" alt="Avatar">
+                            <div class="crown"><i class="fas fa-crown"></i></div>
+                        </div>
+                        <div class="performer-name">Sophia</div>
+                        <div class="performer-score">98%</div>
+                    </div>
+                    
+                    <div class="performer third-place">
+                        <div class="rank">3</div>
+                        <div class="performer-avatar">
+                            <img src="/api/placeholder/50/50" alt="Avatar">
+                        </div>
+                        <div class="performer-name">Marcus</div>
+                        <div class="performer-score">87%</div>
+                    </div>
+                </div>
+                
+                <div class="leaderboard-table">
+                    <div class="table-header">
+                        <div class="rank-col">Rank</div>
+                        <div class="player-col">Player</div>
+                        <div class="score-col">Score</div>
+                        <div class="time-col">Time</div>
+                    </div>
+                    
+                    <div class="table-body">
+                        <!-- Will be populated by JS but showing a few examples -->
+                        <div class="table-row you">
+                            <div class="rank-col">7</div>
+                            <div class="player-col">
+                                <div class="player-avatar">
+                                    <img src="/api/placeholder/30/30" alt="Avatar">
+                                </div>
+                                <div class="player-name">You</div>
+                            </div>
+                            <div class="score-col">75%</div>
+                            <div class="time-col">4:32</div>
+                        </div>
+                        
+                        <div class="table-row">
+                            <div class="rank-col">4</div>
+                            <div class="player-col">
+                                <div class="player-avatar">
+                                    <img src="/api/placeholder/30/30" alt="Avatar">
+                                </div>
+                                <div class="player-name">Emma</div>
+                            </div>
+                            <div class="score-col">85%</div>
+                            <div class="time-col">3:45</div>
+                        </div>
+                        
+                        <div class="table-row">
+                            <div class="rank-col">5</div>
+                            <div class="player-col">
+                                <div class="player-avatar">
+                                    <img src="/api/placeholder/30/30" alt="Avatar">
+                                </div>
+                                <div class="player-name">Daniel</div>
+                            </div>
+                            <div class="score-col">82%</div>
+                            <div class="time-col">5:10</div>
+                        </div>
+                        
+                        <div class="table-row">
+                            <div class="rank-col">6</div>
+                            <div class="player-col">
+                                <div class="player-avatar">
+                                    <img src="/api/placeholder/30/30" alt="Avatar">
+                                </div>
+                                <div class="player-name">Olivia</div>
+                            </div>
+                            <div class="score-col">80%</div>
+                            <div class="time-col">4:22</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="share-results">
+                    <button id="share-btn" class="share-btn">
+                        <i class="fas fa-share-alt"></i> Share Your Results
+                    </button>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="play-again-btn" class="primary-btn">Play Again</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div class="modal" id="share-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Share Your Results</h3>
+                <button class="close-modal-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="share-card">
+                    <div class="share-card-header">
+                        <img src="/api/placeholder/40/40" alt="Nebula Quiz Logo">
+                        <h4>Nebula Quiz</h4>
+                    </div>
+                    <div class="share-card-body">
+                        <p>I scored <strong>75%</strong> on the Science Quiz!</p>
+                        <div class="score-preview">
+                            <div class="score-circle small">
+                                <svg viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" class="score-bg"></circle>
+                                    <circle cx="50" cy="50" r="45" class="score-fill" style="stroke-dasharray: 283; stroke-dashoffset: 70"></circle>
+                                </svg>
+                                <div class="score-text">
+                                    <span>75%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p>Take the challenge and beat my score!</p>
+                    </div>
+                </div>
+                
+                <div class="social-share">
+                    <button class="social-btn facebook"><i class="fab fa-facebook-f"></i> Facebook</button>
+                    <button class="social-btn twitter"><i class="fab fa-twitter"></i> Twitter</button>
+                    <button class="social-btn whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                </div>
+                
+                <div class="copy-link">
+                    <input type="text" value="https://nebulaQuiz.com/share/xD45f" readonly>
+                    <button class="copy-btn"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <i class="fas fa-check-circle"></i>
+            <span id="notification-message">Link copied to clipboard!</span>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
